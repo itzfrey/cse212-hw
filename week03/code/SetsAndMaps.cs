@@ -22,7 +22,25 @@ public static class SetsAndMaps
     public static string[] FindPairs(string[] words)
     {
         // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        var seen = new HashSet<string>();
+        var results = new List<string>();
+ 
+        foreach (var word in words)
+        {
+            // Skip words where both letters are the same (e.g. "aa")
+            if (word[0] == word[1])
+                continue;
+ 
+            // Build the reversed word
+            var reversed = $"{word[1]}{word[0]}";
+ 
+            if (seen.Contains(reversed))
+                results.Add($"{word} & {reversed}");
+            else
+                seen.Add(word);
+        }
+ 
+        return results.ToArray();
     }
 
     /// <summary>
@@ -43,6 +61,14 @@ public static class SetsAndMaps
         {
             var fields = line.Split(",");
             // TODO Problem 2 - ADD YOUR CODE HERE
+            if (fields.Length > 3)
+            {
+                var degree = fields[3].Trim();
+                if (degrees.ContainsKey(degree))
+                    degrees[degree]++;
+                else
+                    degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -66,8 +92,38 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        var counts = new Dictionary<char, int>();
+ 
+        // Count letters in word1 (ignore spaces, normalize to lowercase)
+        foreach (var ch in word1)
+        {
+            if (ch == ' ') continue;
+            var lower = char.ToLower(ch);
+            if (counts.ContainsKey(lower))
+                counts[lower]++;
+            else
+                counts[lower] = 1;
+        }
+ 
+        // Subtract letter counts using word2
+        foreach (var ch in word2)
+        {
+            if (ch == ' ') continue;
+            var lower = char.ToLower(ch);
+            if (counts.ContainsKey(lower))
+                counts[lower]--;
+            else
+                return false; // letter in word2 not in word1
+        }
+ 
+        // All counts must be zero for a true anagram
+        foreach (var count in counts.Values)
+        {
+            if (count != 0)
+                return false;
+        }
+ 
+        return true;
     }
 
     /// <summary>
@@ -101,6 +157,9 @@ public static class SetsAndMaps
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
         // 3. Return an array of these string descriptions.
-        return [];
+        
+        return featureCollection?.Features
+            .Select(f => $"{f.Properties.Place} - Mag {f.Properties.Mag}")
+            .ToArray() ?? [];
     }
 }
